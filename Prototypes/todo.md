@@ -2,7 +2,9 @@
 #TO DO:
 
 1) APIs and resources:
-    - which ones ??
+    - which ones ??:
+        - scrapper ??
+        - api ??
 
     - setup:
         - where ??
@@ -27,7 +29,7 @@
 3) Client/Frontend (No AUTH App)
 
     - UI:
-        - library ??:
+        - library ?? (Insert here):
             - homepage:
                 - ??
             - search:
