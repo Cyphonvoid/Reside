@@ -14,27 +14,43 @@ url = 'https://www.redfin.com/city/30818/TX/Austin'
 
 def click_next_page():
     pass
-
-
-def search_images_on_redfin(url, driver, times):
-    class_name = 'bp-Homecard__Photo--image'
-    driver.get(url)
-    image_urls = []
-
-
-    image_element = driver.find_elements(By.CLASS_NAME, class_name)
-    for image in image_element:
+"""
+  for i in range(0, times):
         try:
-            if((image.get_attribute('src')) and 'http' in image.get_attribute('src')):
-                image_urls.append(image.get_attribute('src'))
+            image_element = driver.find_element(By.CLASS_NAME, class_name)
+
+            if((image_element.get_attribute('src')) and 'http' in image_element.get_attribute('src')):
+                image_urls.append(image_element.get_attribute('src'))
             else:
                 print("ERROR: Image found but has no http url or src tag inside it")
         except Exception as error:
             print("Error:", error)
         
         time.sleep(1)
+    """
+
+def search_images_on_redfin(url, driver, times):
+    class_name = 'bp-Homecard__Photo--image'
+    driver.get(url)
+    image_urls = []
+
+    images = driver.find_elements(By.CLASS_NAME, class_name)
     
+    for image in images:
+        print(image.get_attribute('src'))
+
     return image_urls
+
+
+def open_image_online(driver):
+
+    file = open("C:\\Users\\yasha\\Visual Studio Workspaces\\SystemX\\Reside\\WebScraper\\PageScripts\\image_urls.txt", "r")
+
+    for i in range(0, 20):
+        line = file.readline()
+        print(line)
+        driver.get(line)
+        time.sleep(0.4)
 
 
 def download_and_save_images(url_array):
@@ -70,6 +86,14 @@ def download_and_save_images(url_array):
 
 #https://ssl.cdn-redfin.com/system_files/media/890870_JPG/genDesktopMapHomeCardUrl/item_21.jpg
 driver = webdriver.Chrome()
-array = search_images_on_redfin(url, driver, 7)
-print(array)
-download_and_save_images(array)
+#array = search_images_on_redfin(url, driver, 7)
+#print(array)
+#download_and_save_images(array)
+open_image_online(driver=driver)
+
+        
+
+
+
+
+    
