@@ -22,6 +22,9 @@ urls = [('https://www.trulia.com/', By.XPATH, '/html/body/div[1]/div[1]/main/div
         ('https://www.zillow.com/homes/for_rent/', By.XPATH, '/html/body/div[1]/div/div[2]/div/section/div[1]/div/form/div/div/input')
         ]
 
+urls = [
+     ('https://www.realtor.com/', By.XPATH, '/html/body/div[1]/div/div[1]/div[3]/div[1]/div/div[1]/div[2]/div/div/div/header/div/div/div/input')
+]
 working = []
 
 
@@ -31,8 +34,10 @@ def load_website(url, times, element=None):
 
     for i in range(0, times):
         try:
+            
             driver.get(url)
             if(element != None):
+                time.sleep(1)
                 searched = driver.find_element(element[0], element[1])
                 works = True
             time.sleep(1)
