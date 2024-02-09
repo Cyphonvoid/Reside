@@ -46,11 +46,11 @@ def open_image_online(driver):
 
     file = open("C:\\Users\\yasha\\Visual Studio Workspaces\\SystemX\\Reside\\WebScraper\\PageScripts\\image_urls.txt", "r")
 
-    for i in range(0, 20):
+    for i in range(0, 40):
         line = file.readline()
         print(line)
         driver.get(line)
-        time.sleep(0.4)
+        time.sleep(1)
 
 
 def download_and_save_images(url_array):
