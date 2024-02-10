@@ -84,6 +84,7 @@ def download_and_save_images(url_array):
         except Exception as error:
             print(error, "Error: Couldn't create file!")
 
+
 #https://ssl.cdn-redfin.com/system_files/media/890870_JPG/genDesktopMapHomeCardUrl/item_21.jpg
 driver = webdriver.Chrome()
 #array = search_images_on_redfin(url, driver, 7)
