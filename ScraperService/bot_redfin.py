@@ -24,7 +24,6 @@ class Delay():
         time.sleep(self.time)
 
 
-
 class Bot():
 
     def __init__(self, url, driver):
@@ -153,5 +152,6 @@ display = True
 if(display == True):
     for ur in url:
         print(ur)
+
     
 
