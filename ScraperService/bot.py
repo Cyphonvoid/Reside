@@ -47,11 +47,14 @@ class Bot():
     def __init__(self, url, driver):
         self.url = url
         self.driver = driver
-        self.driver.get(self.url)
+        #self.driver.get(self.url)
         self.current_element = None
         self.delayed_search_time = 0.5
         self.delay = Delay(0.5)
         self.stack = deque()
+
+    def activate(self):
+        self.driver.get(self.url)
 
     def search_element(self, by, identifier):
         element = None
@@ -122,9 +125,7 @@ class Bot():
         self.delay.set(delay)
         return self
     
-
-
-
+"""
 
 def click_option(bot):
     
@@ -147,6 +148,7 @@ url = 'https://www.redfin.com/city/30818/TX/Austin/filter/viewport=30.53995:30.0
 element = None
 
 bot = Bot(url, driver)
+bot.activate()
 address = 'San Marcos'
 
 
@@ -171,3 +173,4 @@ display = True
 if(display == True):
     for ur in url:
         print(ur)
+"""
