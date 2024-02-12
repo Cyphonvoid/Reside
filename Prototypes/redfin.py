@@ -91,10 +91,3 @@ driver = webdriver.Chrome()
 #print(array)
 #download_and_save_images(array)
 open_image_online(driver=driver)
-
-        
-
-
-
-
-    

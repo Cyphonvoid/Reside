@@ -11,7 +11,6 @@ from PIL import Image
 from collections import deque
 
 
-
 class Delay():
 
     def __init__(self, value):
@@ -23,6 +22,25 @@ class Delay():
     def run(self):
         time.sleep(self.time)
 
+
+class IterableElementList():
+
+    def __init__(self, list):
+        self.list = list
+        self.current_element = None
+    
+    def at(self, index):
+        try:
+            self.current_element = self.list[index]
+            return self
+
+        except Exception as error:
+            return self       
+
+    def click(self):
+
+        pass
+    
 
 class Bot():
 
@@ -103,6 +121,7 @@ class Bot():
     def search_delay(self, delay):
         self.delay.set(delay)
         return self
+    
 
 
 
@@ -121,7 +140,6 @@ def click_option(bot):
 
 
 def home_type(bot):
-
     pass
 
 driver = webdriver.Chrome()
@@ -142,6 +160,7 @@ click_option(bot)
 #Wait for the 4 seconds and then search for the images. 
 elements = bot.wait(4).search_elements(By.CLASS_NAME, 'bp-Homecard__Photo--image').get_element()
 
+#Get the address and locationss as well
 
 url = []
 for element in elements:
@@ -152,6 +171,3 @@ display = True
 if(display == True):
     for ur in url:
         print(ur)
-
-    
-

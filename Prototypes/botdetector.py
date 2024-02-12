@@ -25,7 +25,10 @@ urls = [('https://www.trulia.com/', By.XPATH, '/html/body/div[1]/div[1]/main/div
 urls = [
      ('https://www.realtor.com/', By.XPATH, '/html/body/div[1]/div/div[1]/div[3]/div[1]/div/div[1]/div[2]/div/div/div/header/div/div/div/input')
 ]
+
+
 working = []
+
 
 
 driver = webdriver.Chrome()
@@ -49,12 +52,11 @@ def load_website(url, times, element=None):
         working.append(url)
 
 
-
 for url in urls:
     load_website(url[0], 3, (url[1], url[2]))
 
 
-print("working urls: ", working)
+print("working website urls: ", working)
 driver.quit()
 
 
