@@ -228,6 +228,5 @@ class RedfinBot():
         pass
     pass
 
-
 bot = RedfinBot()
 bot.get_images_on_address('San Marcos', 'for sale')
