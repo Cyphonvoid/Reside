@@ -6,28 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import random
 
-class RentCastWrapper():
-
-    def __init__(self):
-        self.data = []
-        pass
-
-    def get_next_data(self):
-        pass
-
-    def push(self, data):
-        self.data.append(data)
-
-    def pop(self, index=None):
-        if(index > len(self.data)):
-            return
-        
-        if(index == None):
-            self.data.pop()
-        
-        else:
-            self.data.pop(index)
-
 
 class ZillowScript():
 
@@ -87,7 +65,7 @@ Driver = webdriver.Chrome(options=chrome_options)
 
 scraper = ZillowScript(url[2], Driver)
 scraper.scrape()
-#scraper.close()
+
 
     
 

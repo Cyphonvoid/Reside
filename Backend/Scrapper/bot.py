@@ -4,11 +4,10 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
 import time
-import requests
-import io
-from PIL import Image
 from collections import deque
+from Utility import State
 
 
 class Delay():
@@ -42,6 +41,24 @@ class IterableElementList():
         pass
     
 
+class EXP_WAIT():
+
+    def __init__(self, driver):
+        self.wait = WebDriverWait(driver, 5)
+        self.driver = driver
+        self._status = State()
+        self._status.set_false()
+
+    def set_time(self, time):
+        del self.wait
+        self.wait = WebDriverWait(self.driver, time)
+    
+    def get_element(self, id, value):
+        return self.wait.until(EC.presence_of_element_located((id, value)))
+    
+    def status(self):
+        return self._status
+
 class Bot():
 
     def __init__(self, url, driver):
@@ -52,15 +69,31 @@ class Bot():
         self.delayed_search_time = 0.5
         self.delay = Delay(0.5)
         self.stack = deque()
+        self.exp_wait = EXP_WAIT(self.driver)
 
     def activate(self):
         self.driver.get(self.url)
+        return self
+
+    def explicit_wait(self, time):
+        if(time == 0):
+            self.exp_wait.status().set_false()
+            return self
+        self.exp_wait.status().set_true()
+        self.exp_wait.set_time(time)
+        return self
 
     def search_element(self, by, identifier):
         element = None
         try:
-            element = self.driver.find_element(by, identifier)
-            self.current_element = element
+            
+            if(self.exp_wait.status().check() == True):
+                element = self.exp_wait.get_element(by, identifier)
+                self.current_element = element
+            else:
+                element = self.driver.find_element(by, identifier)
+                self.current_element = element
+
             self.delay.run()
             return self
         except Exception as error:
@@ -124,6 +157,9 @@ class Bot():
     def search_delay(self, delay):
         self.delay.set(delay)
         return self
+    
+    def get_driver(self):
+        return self.driver
     
 """
 

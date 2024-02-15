@@ -3,6 +3,8 @@ from selenium import webdriver
 from Utility import ObjectID, State
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 """
 Tasks based:
@@ -51,6 +53,7 @@ class ElementReference():
         return False
 
 
+#---------------------------------------- DATA COLLECTION MODULES---------------------------------------------
 class Listing():
 
     def __init__(self):
@@ -85,6 +88,7 @@ class FetchListings():
         pass
 
 
+#-----------------------------------------FILTER MODULES---------------------------------------------------
 
 class HouseType():
 
@@ -104,6 +108,16 @@ class HouseType():
             return self.for_rent
         
 
+class PriceRange():
+    def __init__(self):
+        pass
+
+
+class HomeTyoe():
+    pass
+
+
+#--------------------------------------------ADDRESS SEARCH MODULES------------------------------------------------
 class RedfinSearch():
 
     def __init__(self, bot):
@@ -117,12 +131,13 @@ class RedfinSearch():
 
     def __task(self):
         #Search for the address and click okay
-        element = self.bot.wait(4).search_element(self.search_element.get_reference('By'), self.search_element.get_reference('value')).get_element()
+        element = self.bot.wait(3).search_element(self.search_element.get_reference('By'), self.search_element.get_reference('value')).get_element()
         element.send_keys(self.location_address)
+        self.bot.wait(1)
         element.send_keys(Keys.ENTER)
-        self.bot.wait(4)
+        self.bot.wait(3)
         
-
+        #"""
         if(self.filter != None):
             #Apply the filters
             #Click on house filter
@@ -144,7 +159,16 @@ class RedfinSearch():
             path = '/html/body/div[1]/div[8]/div[2]/div[1]/div[2]/div/div/div/div[1]/form/div[1]/div/div[2]/div/div[2]/button'
             self.bot.search_element(By.XPATH, path).get_element().click()
             self.bot.wait(3)
+            #"""
     
+
+    def __exception_guard(self):
+        try:
+            self.__task()
+        except Exception as error:
+
+            pass
+        
     def set_location_address(self, address):
         if(isinstance(address, str)):
             self.location_address = address
@@ -178,6 +202,7 @@ class Tasks():
                 return task       
         return False
 
+
     def add(self, task):
         self.task_list.append(task)
     
@@ -202,6 +227,8 @@ class Tasks():
 
 
 
+#-----------------------------------------------------INTERFACE MODULES-------------------------------------------------------
+#Interface that other services will interact with
 class RedfinBot():
 
     def __init__(self):
@@ -212,10 +239,55 @@ class RedfinBot():
 
         self.bot.activate()
 
+
+    def login_to_website(self, credentials):
+
+        try:
+            val = '/html/body/div[1]/div[2]/div/div/header[2]/div[2]/div[7]/button'
+            el = self.bot.search_element(By.XPATH, val).get_element()
+            el.click()
+            self.bot.wait(1)
+            
+            """
+            val = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[1]/div/span/span/div/input'
+            el = self.bot.get_driver().find_element(By.XPATH, val)
+            el.send_keys("yashaswi.kul@gmail.com")
+            self.bot.wait(4)
+            el.send_keys(Keys.ENTER)
+            self.bot.wait(3)
+            #"""
+
+            val = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[1]/div/span/span/div/input'
+            el = self.bot.search_element(By.XPATH, val).get_element()
+            el.send_keys("yashaswi.kul@gmail.com")
+            self.bot.wait(1)
+            el.send_keys(Keys.ENTER)
+            self.bot.wait(0.3)
+
+            
+            vars = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/div[3]/button'
+            el = self.bot.search_element(By.XPATH, vars).get_element()
+            el.click()
+            self.bot.wait(0.3)
+
+            
+            var1 = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[2]/span/span/div/input'
+            el = self.bot.search_element(By.XPATH, var1).get_element()
+            el.send_keys("yashema@E494murlipura2")
+            el.send_keys(Keys.ENTER)
+            self.bot.wait(1)
+        except Exception as error:
+            print("Error= ", error)
+        #"""
+        
+        pass
+
     def get_images_on_address(self, address, filter=None):
+        self.login_to_website(credentials=('yashaswi.kul@gmail.com', 'yashema@E494murlipura2'))
         self.redfin_search.set_location_address(address)
         if(filter != None): self.redfin_search.apply_filter(filter)
         self.redfin_search.perform()
+        #"""
         pass
 
     def get_text(self):
@@ -228,5 +300,8 @@ class RedfinBot():
         pass
     pass
 
-bot = RedfinBot()
-bot.get_images_on_address('San Marcos', 'for sale')
+
+
+
+#bot = RedfinBot()
+#bot.get_images_on_address('512 Valley St, San Marcos, TX', 'for sale')

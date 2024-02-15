@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 
 import time
-driver = webdriver.Chrome()
+
 
 
 
@@ -23,13 +23,14 @@ urls = [('https://www.trulia.com/', By.XPATH, '/html/body/div[1]/div[1]/main/div
         ]
 
 urls = [
-     ('https://www.realtor.com/', By.XPATH, '/html/body/div[1]/div/div[1]/div[3]/div[1]/div/div[1]/div[2]/div/div/div/header/div/div/div/input')
+     ('https://www.redfin.com/', By.XPATH, '/html/body/div[1]/div[6]/div[2]/div/section/div/div/div/div/div/div/div/div[2]/div/div/form/div/div/input')
 ]
 
 
 working = []
 
-
+def test():
+    pass
 
 driver = webdriver.Chrome()
 def load_website(url, times, element=None):
@@ -42,6 +43,9 @@ def load_website(url, times, element=None):
             if(element != None):
                 time.sleep(1)
                 searched = driver.find_element(element[0], element[1])
+                searched.send_keys('San Marcos')
+                searched.send_keys(Keys.ENTER)
+                time.sleep(3)
                 works = True
             time.sleep(1)
         except Exception as error:
@@ -53,7 +57,7 @@ def load_website(url, times, element=None):
 
 
 for url in urls:
-    load_website(url[0], 3, (url[1], url[2]))
+    load_website(url[0], 9, (url[1], url[2]))
 
 
 print("working website urls: ", working)
