@@ -1,10 +1,11 @@
 from bot import Bot
 from selenium import webdriver
-from Utility import ObjectID, State
+from Utility import ObjectID, Flag
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import json
 
 """
 Tasks based:
@@ -123,7 +124,7 @@ class RedfinSearch():
     def __init__(self, bot):
         self.bot = bot
         self._id = ObjectID('redfin search', 2000)
-        self.status = State()
+        self.status = Flag()
         self.location_address = None
         self.search_element = ElementReference(By.CLASS_NAME, 'search-input-box')
         self.property_type = HouseType()
@@ -166,8 +167,7 @@ class RedfinSearch():
         try:
             self.__task()
         except Exception as error:
-
-            pass
+            return error
         
     def set_location_address(self, address):
         if(isinstance(address, str)):
@@ -178,7 +178,6 @@ class RedfinSearch():
 
     def perform(self):
         self.__task()
-        pass
 
     def id(self):
         return self._id
@@ -226,6 +225,69 @@ class Tasks():
                 return False
 
 
+class GeneralLocation():
+
+    def __init__(self, bot):
+        self.bot = bot
+        self.location_address = None
+        
+    def address(self, address):
+        self.location_address = address
+
+    def fetch_listing_data(self):
+        pass
+
+    def apply_filters(self):
+        pass
+
+
+class SpecificLocation():
+
+    def __init__(self, bot):
+        self.bot = bot
+        self.location_address = None
+        self.image_urls = []
+        self.price = None
+        self.amenities = []
+        self.response = None
+    
+    def address(self, address):
+        self.location_address = address
+    
+    def fetch_listing_data(self):
+        try:
+            #GETTING IMAGE URLS
+            val1 = 'image'
+            elements = self.bot.search_elements(By.TAG_NAME, 'img').get_element()
+            for element in elements: self.image_urls.append(element.get_attribute('src'))
+
+            #GET PRICE
+            self.price = self.bot.search_element(By.CLASS_NAME, 'statsValue').get_element()
+            self.price = self.price.text
+
+            #GET AMENITIES
+            var = '/html/body/div[1]/div[11]/div[2]/div[6]/section/div/div[2]/div/div[1]/div[2]/div[1]/div/ul/li[1]'
+            end = ']'
+            
+            self.amenities.append(self.bot.search_element(By.XPATH, var))
+        except Exception as error:
+            self.response = {
+            'image_urls':self.image_urls, 
+            'price':self.price, 
+            'amenities':self.amenities
+            }
+            return self.response
+
+
+        self.response = {
+            'image_urls':self.image_urls, 
+            'price':self.price, 
+            'amenities':self.amenities
+        }
+
+        return self.response
+
+
 
 #-----------------------------------------------------INTERFACE MODULES-------------------------------------------------------
 #Interface that other services will interact with
@@ -236,9 +298,12 @@ class RedfinBot():
         self.bot = Bot(INIT_URL, self.driver)
         self.tasks = Tasks()
         self.redfin_search = RedfinSearch(self.bot)
-
+        self.specific_fetcher = SpecificLocation(self.bot)
+        self.general_fetcher = GeneralLocation(self.bot)
+        self._address = None
+        self.listing_response = None
+        self.listing_type = 'specific'
         self.bot.activate()
-
 
     def login_to_website(self, credentials):
 
@@ -247,22 +312,15 @@ class RedfinBot():
             el = self.bot.search_element(By.XPATH, val).get_element()
             el.click()
             self.bot.wait(1)
-            
-            """
-            val = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[1]/div/span/span/div/input'
-            el = self.bot.get_driver().find_element(By.XPATH, val)
-            el.send_keys("yashaswi.kul@gmail.com")
-            self.bot.wait(4)
-            el.send_keys(Keys.ENTER)
-            self.bot.wait(3)
+           
             #"""
-
             val = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[1]/div/span/span/div/input'
             el = self.bot.search_element(By.XPATH, val).get_element()
             el.send_keys("yashaswi.kul@gmail.com")
             self.bot.wait(1)
             el.send_keys(Keys.ENTER)
             self.bot.wait(0.3)
+            #"""
 
             
             vars = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/div[3]/button'
@@ -276,6 +334,7 @@ class RedfinBot():
             el.send_keys("yashema@E494murlipura2")
             el.send_keys(Keys.ENTER)
             self.bot.wait(1)
+
         except Exception as error:
             print("Error= ", error)
         #"""
@@ -283,25 +342,63 @@ class RedfinBot():
         pass
 
     def get_images_on_address(self, address, filter=None):
+        #LOGIN
         self.login_to_website(credentials=('yashaswi.kul@gmail.com', 'yashema@E494murlipura2'))
+        
+        #SEARCHING
         self.redfin_search.set_location_address(address)
         if(filter != None): self.redfin_search.apply_filter(filter)
         self.redfin_search.perform()
-        #"""
-        pass
 
-    def get_text(self):
-        pass
+
+    def get_response(self):
+        #LOGIN
+        self.login_to_website(credentials=('yashaswi.kul@gmail.com', 'yashema@E494murlipura2'))
+        
+        #SEARCHING
+        self.redfin_search.set_location_address(self._address)
+        self.redfin_search.perform()
+
+        #FETCHING
+        if(self.listing_type == 'general'):
+            self.listing_response = self.general_fetcher.fetch_listing_data()
+        
+        elif(self.listing_type == 'specific'):
+            self.listing_response = self.specific_fetcher.fetch_listing_data()
+
+        return self.listing_response
+
+    def address(self, address):
+        self._address = address
+        return self
     
-    def run(self):
-        self.tasks.run()
-
-    def stop(self):
-        pass
-    pass
-
+    def location(self, type):
+        self.listing_type = type
+        return self
+    
 
 
 
 #bot = RedfinBot()
 #bot.get_images_on_address('512 Valley St, San Marcos, TX', 'for sale')
+
+
+#NOTE:
+"""
+Apply Filters:
+    - Manipulate settings buttons
+
+Specific Address
+    - Parse the single page
+        - Get the images
+        - Get other text data
+    
+
+General Address
+    - Search x amount of listing and get
+        - Get all the text/image data
+
+    - Search all amount of listing and get
+        - Get all the text/image data
+
+"""

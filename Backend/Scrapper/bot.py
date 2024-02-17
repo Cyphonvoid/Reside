@@ -7,7 +7,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 import time
 from collections import deque
-from Utility import State
+from Utility import Flag
 
 
 class Delay():
@@ -46,7 +46,7 @@ class EXP_WAIT():
     def __init__(self, driver):
         self.wait = WebDriverWait(driver, 5)
         self.driver = driver
-        self._status = State()
+        self._status = Flag()
         self._status.set_false()
 
     def set_time(self, time):
@@ -64,12 +64,12 @@ class Bot():
     def __init__(self, url, driver):
         self.url = url
         self.driver = driver
-        #self.driver.get(self.url)
         self.current_element = None
         self.delayed_search_time = 0.5
         self.delay = Delay(0.5)
         self.stack = deque()
         self.exp_wait = EXP_WAIT(self.driver)
+        self.exp_wait.status().set_false()
 
     def activate(self):
         self.driver.get(self.url)
@@ -82,6 +82,7 @@ class Bot():
         self.exp_wait.status().set_true()
         self.exp_wait.set_time(time)
         return self
+
 
     def search_element(self, by, identifier):
         element = None
@@ -98,6 +99,7 @@ class Bot():
             return self
         except Exception as error:
             print(".search element() failed!")
+            self.current_element = None
             return self
     
     def search_elements(self, by, identifier):
@@ -110,6 +112,7 @@ class Bot():
         
         except Exception as error:
             print(".search_elements() failed!")
+            self.current_element = None
             return self
     
     def next_page(self, url):

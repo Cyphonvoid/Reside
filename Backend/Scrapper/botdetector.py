@@ -62,6 +62,4 @@ for url in urls:
 
 print("working website urls: ", working)
 driver.quit()
-
-
-
+  

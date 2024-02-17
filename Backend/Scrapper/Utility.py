@@ -29,7 +29,7 @@ class ObjectID():
 
 
 
-class State():
+class Flag():
 
     def __init__(self):
         self.state = False
