@@ -8,6 +8,62 @@ from selenium.webdriver.chrome.options import Options
 #from Server.Server import MultiClientServer
 import threading
 from Client import WebClient
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+
+class Serve(BaseHTTPRequestHandler):
+
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "Json")
+        self.end_headers()
+        self.param_list = []
+
+        print("URL RECIEVED:", self.path)
+        self.param_list = self.path.split('/')
+
+        if('service' in self.param_list):
+            index = self.param_list.index('service')
+            index += 1
+
+            try:
+            
+                string = self.param_list[index]
+                param_list = []
+                for i in range(0, len(string)):
+                    param_list.append(string[i])
+
+                p_str = ''
+                for i in range(0, len(param_list)-1):
+                    if(i > len(param_list)-1):break
+                    if(param_list[i] == '%'):
+                        if(param_list[i+1] == '2'):
+                            param_list.pop(i+1)
+                            param_list.pop(i+1)
+                        param_list.pop(i)
+                        param_list.insert(i, " ")
+                    p_str += param_list[i]
+                        
+
+                print("AFTER FILTER: ", p_str)
+                value = self.process_request(p_str)
+                response = "{ 'message': " + str(value) + " }" 
+                self.send_response(500)
+                self.wfile.write(bytes(response, "utf-8"))
+            
+            except Exception as error:
+                print(error)
+                self.wfile.write(bytes("Address specified is nout found", "utf-8"))
+        
+        else:
+            self.send_response(403)
+
+    def process_request(self, address):
+        bot = RedfinBot()
+        #value = bot.get_images_on_address(address)
+        value = bot.location('specific').address(address).get_response()
+        return value
+        pass
 
 
 def launcher(address):
@@ -20,14 +76,26 @@ def launcher(address):
 def launch_server():
     print("Enter your address: ", end="")
     address = input()
+    if(address == 'exit'):
+        return
     bot = RedfinBot()
     #value = bot.get_images_on_address(address)
     value = bot.location('specific').address(address).get_response()
     client = WebClient('Scrapper Bot')
     client.load_message(value)
-    client.connect_to('192.168.1.222', 9999).run()
+    client.connect_to('192.168.1.183', 9999).run()
     print("test", client.get_card().read().name())
     client.close()
+
+
+
+def launch_http():
+    print("HTTP://192.168.222:9999   Started.....")
+    server = HTTPServer(('192.168.1.222', 9999), Serve)
+    server.serve_forever()
+    server.server_close()
+
+    pass
 
 
 print("Testing program has started: ")
@@ -40,8 +108,12 @@ while(True):
     if(var == 'launch'):
         print("Enter your address please: ", end="")
         val = input()
+        if(val == 'exit'):
+            continue
         launcher(val)
     
+    elif(var == 'http server'):
+        launch_http()
     elif(var == 'exit'):
         break
 

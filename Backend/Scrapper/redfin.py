@@ -26,6 +26,10 @@ Part based:
 
 INIT_URL = 'https://www.redfin.com/'
 WEB_DRIVER = None
+LOGIN_ERROR_CODE = 'scrapper login error'
+SEARCHING_ERROR_CODE = 'scrapper address error'
+DATA_FETCHING_ERROR_CODE = 'scrapper image fetching error'
+
 
 #In future, elements references can be chained kind of like action chains
 class ElementReference():
@@ -132,35 +136,38 @@ class RedfinSearch():
 
     def __task(self):
         #Search for the address and click okay
-        element = self.bot.wait(3).search_element(self.search_element.get_reference('By'), self.search_element.get_reference('value')).get_element()
-        element.send_keys(self.location_address)
-        self.bot.wait(1)
-        element.send_keys(Keys.ENTER)
-        self.bot.wait(3)
-        
-        #"""
-        if(self.filter != None):
-            #Apply the filters
-            #Click on house filter
-            path = '/html/body/div[1]/div[8]/div[2]/div[1]/div[2]/div/div/div/div[1]/form/div[1]/div'
-            main = self.property_type.get_main()
-            self.bot.search_element(main.get_reference('By'), main.get_reference('value')).get_element().click()
 
-            if(self.filter == 'for rent'):
-                #Select the rent option
-                button = self.property_type.get_sub_filter('for rent')
-                self.bot.wait(0.5).search_element(button.get_reference('By'), button.get_reference('value')).get_element().click()
-            
-            elif(self.filter == 'for sale'):
-                #Select the rent option
-                button = self.property_type.get_sub_filter('for sale')
-                self.bot.wait(0.5).search_element(button.get_reference('By'), button.get_reference('value')).get_element().click()
-
-            #Click on done
-            path = '/html/body/div[1]/div[8]/div[2]/div[1]/div[2]/div/div/div/div[1]/form/div[1]/div/div[2]/div/div[2]/button'
-            self.bot.search_element(By.XPATH, path).get_element().click()
+        try:
+            element = self.bot.wait(1).search_element(self.search_element.get_reference('By'), self.search_element.get_reference('value')).get_element()
+            element.send_keys(self.location_address)
+            element.send_keys(Keys.ENTER)
             self.bot.wait(3)
+            
             #"""
+            if(self.filter != None):
+                #Apply the filters
+                #Click on house filter
+                path = '/html/body/div[1]/div[8]/div[2]/div[1]/div[2]/div/div/div/div[1]/form/div[1]/div'
+                main = self.property_type.get_main()
+                self.bot.search_element(main.get_reference('By'), main.get_reference('value')).get_element().click()
+
+                if(self.filter == 'for rent'):
+                    #Select the rent option
+                    button = self.property_type.get_sub_filter('for rent')
+                    self.bot.wait(0.5).search_element(button.get_reference('By'), button.get_reference('value')).get_element().click()
+                
+                elif(self.filter == 'for sale'):
+                    #Select the rent option
+                    button = self.property_type.get_sub_filter('for sale')
+                    self.bot.wait(0.5).search_element(button.get_reference('By'), button.get_reference('value')).get_element().click()
+
+                #Click on done
+                path = '/html/body/div[1]/div[8]/div[2]/div[1]/div[2]/div/div/div/div[1]/form/div[1]/div/div[2]/div/div[2]/button'
+                self.bot.search_element(By.XPATH, path).get_element().click()
+                self.bot.wait(3)
+                #"""
+        except Exception as error:
+            return SEARCHING_ERROR_CODE
     
 
     def __exception_guard(self):
@@ -177,7 +184,7 @@ class RedfinSearch():
         self.filter = filter
 
     def perform(self):
-        self.__task()
+        return self.__task()
 
     def id(self):
         return self._id
@@ -257,10 +264,40 @@ class SpecificLocation():
     def fetch_listing_data(self):
         try:
             #GETTING IMAGE URLS
-            val1 = 'image'
-            elements = self.bot.search_elements(By.TAG_NAME, 'img').get_element()
-            for element in elements: self.image_urls.append(element.get_attribute('src'))
+            
+            try:
+                image_button = '/html/body/div[1]/div[11]/div[1]/div[3]/div/div[5]/div/button'
+                self.bot.search_element(By.XPATH, image_button).get_element().click()
 
+                image_class1 = 'inline-block selected'
+                image_class2 = 'inline-block'
+                
+                #self.bot.explicit_wait(1)
+                element_list1 = self.bot.wait(0.5).search_elements(By.CLASS_NAME, image_class1).get_element()
+                element_list2 = self.bot.wait(0.5).search_elements(By.CLASS_NAME, image_class2).get_element()
+                #https://ssl.cdn-redfin.com/photo
+
+                for element in element_list1:
+                    self.image_urls.append(element.get_attribute('src'))
+                
+                for element in element_list2:
+                    self.image_urls.append(element.get_attribute('src'))
+
+                for i in range(len(self.image_urls) - 1, -1, -1):
+                    if self.image_urls[i] is None or self.image_urls[i] == 'None':
+                        self.image_urls.pop(i)
+
+            except Exception as error:
+                     print("SOME IMAGES WERE NOT FOUND", error)
+                     return DATA_FETCHING_ERROR_CODE
+
+            try:
+                close_button = '//*[@id="bp-dialog-container"]/div[1]/button'
+                self.bot.search_element(By.XPATH, close_button).get_element().click()
+            except Exception as error:
+                print("CLOSE BUTTON NOT FOUND")
+            
+            
             #GET PRICE
             self.price = self.bot.search_element(By.CLASS_NAME, 'statsValue').get_element()
             self.price = self.price.text
@@ -269,7 +306,8 @@ class SpecificLocation():
             var = '/html/body/div[1]/div[11]/div[2]/div[6]/section/div/div[2]/div/div[1]/div[2]/div[1]/div/ul/li[1]'
             end = ']'
             
-            self.amenities.append(self.bot.search_element(By.XPATH, var).get_element().text)
+            self.amenities.append(self.bot.wait(0.5).search_element(By.XPATH, var).get_element().text)
+
         except Exception as error:
             self.response = {
             'image_urls':self.image_urls, 
@@ -291,6 +329,8 @@ class SpecificLocation():
 
 #-----------------------------------------------------INTERFACE MODULES-------------------------------------------------------
 #Interface that other services will interact with
+
+
 class RedfinBot():
 
     def __init__(self):
@@ -307,36 +347,40 @@ class RedfinBot():
 
     def login_to_website(self, credentials):
         try:
-            val = '/html/body/div[1]/div[2]/div/div/header[2]/div[2]/div[7]/button'
-            el = self.bot.search_element(By.XPATH, val).get_element()
-            el.click()
-            self.bot.wait(1)
+            try:
+                val = '/html/body/div[1]/div[2]/div/div/header[2]/div[2]/div[7]/button'
+                el = self.bot.wait(1).search_element(By.XPATH, val).get_element()
+                el.click()
+                self.bot.wait(1)
+            except Exception as error:
+                val = '/html/body/div[1]/div[2]/div/div/header[2]/div[2]/div[7]/button'
+                el = self.bot.wait(1).search_element(By.XPATH, val).get_element()
+                el.click()
+                self.bot.wait(1)
+                pass
            
             val = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[1]/div/span/span/div/input'
             el = self.bot.search_element(By.XPATH, val).get_element()
             el.send_keys(credentials[0])
-            self.bot.wait(1)
             el.send_keys(Keys.ENTER)
             self.bot.wait(0.3)
  
             vars = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/div[3]/button'
             el = self.bot.search_element(By.XPATH, vars).get_element()
             el.click()
-            self.bot.wait(0.3)
 
             var1 = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[2]/span/span/div/input'
             el = self.bot.search_element(By.XPATH, var1).get_element()
             el.send_keys(credentials[1])
             el.send_keys(Keys.ENTER)
-            self.bot.wait(1)
 
         except Exception as error:
             print("Error= ", error)
+            return LOGIN_ERROR_CODE
 
     def get_images_on_address(self, address, filter=None):
         #LOGIN
-        self.login_to_website(credentials=('yashaswi.kul@gmail.com', 'yashema@E494murlipura2'))
-        
+        value = self.login_to_website(credentials=('yashaswi.kul@gmail.com', 'yashema@E494murlipura2'))
         #SEARCHING
         self.redfin_search.set_location_address(address)
         if(filter != None): self.redfin_search.apply_filter(filter)
@@ -345,18 +389,22 @@ class RedfinBot():
 
     def get_response(self):
         #LOGIN
-        self.login_to_website(credentials=('yashaswi.kul@gmail.com', 'yashema@E494murlipura2'))
+        value = self.login_to_website(credentials=('yashaswi.kul@gmail.com', 'yashema@E494murlipura2'))
+        if(value == LOGIN_ERROR_CODE): return LOGIN_ERROR_CODE
         
         #SEARCHING
         self.redfin_search.set_location_address(self._address)
-        self.redfin_search.perform()
+        value = self.redfin_search.perform()
+        if(value == SEARCHING_ERROR_CODE): return SEARCHING_ERROR_CODE
 
         #FETCHING
         if(self.listing_type == 'general'):
             self.listing_response = self.general_fetcher.fetch_listing_data()
+            if(self.listing_response == DATA_FETCHING_ERROR_CODE): return DATA_FETCHING_ERROR_CODE
         
         elif(self.listing_type == 'specific'):
             self.listing_response = self.specific_fetcher.fetch_listing_data()
+            if(self.listing_response == DATA_FETCHING_ERROR_CODE): return DATA_FETCHING_ERROR_CODE
 
         return self.listing_response
 

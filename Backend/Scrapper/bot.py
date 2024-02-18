@@ -22,25 +22,6 @@ class Delay():
         time.sleep(self.time)
 
 
-class IterableElementList():
-
-    def __init__(self, list):
-        self.list = list
-        self.current_element = None
-    
-    def at(self, index):
-        try:
-            self.current_element = self.list[index]
-            return self
-
-        except Exception as error:
-            return self       
-
-    def click(self):
-
-        pass
-    
-
 class EXP_WAIT():
 
     def __init__(self, driver):
@@ -105,13 +86,20 @@ class Bot():
     def search_elements(self, by, identifier):
         elements = None
         try:
-            elements = self.driver.find_elements(by, identifier)
-            self.current_element = elements
-            self.delay.run()
+            #elements = self.driver.find_elements(by, identifier)
+            #self.current_element = elements
+            if(self.exp_wait.status().check() == True):
+                elements = self.exp_wait.get_element(by, identifier)
+                self.current_element = elements
+            
+            else:
+                elements = self.driver.find_elements(by, identifier)
+                self.current_element = elements
+
             return self
         
         except Exception as error:
-            print(".search_elements() failed!")
+            print(".search_elements() failed!", error)
             self.current_element = None
             return self
     
@@ -157,7 +145,7 @@ class Bot():
     def get_element(self):
         return self.current_element
 
-    def search_delay(self, delay):
+    def set_delay(self, delay):
         self.delay.set(delay)
         return self
     
