@@ -209,18 +209,26 @@ class WebClient():
         self.client_id = ComponentID('client_id', name)
         self.status = Status(False)
         #self.shell = ReverseShell()
+        self.auto_reconnect = Status(True)
+        self.reconnection_attempt_limit = 6
+        self._message = 'None'
 
 
     def connect_to(self, IP, PORT):
-        if(self.connection.establish_with(IP, PORT)):
-            print("[Web Client] - " + self.client_id.read().name(), "is active and connected")
-            self.remote_address = self.connection.remote_server_address()
-            self.local_address = self.connection.local_machine_address()
-            self.status.set_true()
-        
-        else:
-            self.status.set_false()
-            print("[Web Client - " + self.client_id.read().name(), "is NOT active and disconnected")
+        if(self.auto_reconnect.get() == True):
+            for i in range(0, self.reconnection_attempt_limit+1):
+                if(self.connection.establish_with(IP, PORT)):
+                    print("[Web Client] - " + self.client_id.read().name(), "is active and connected")
+                    self.remote_address = self.connection.remote_server_address()
+                    self.local_address = self.connection.local_machine_address()
+                    self.status.set_true()
+                    return self
+                
+                else:
+                    self.status.set_false()
+                    print("[Web Client - " + self.client_id.read().name(), "is NOT active and disconnected")
+                    print("attempting to reconnect...", "limit = ", self.reconnection_attempt_limit)
+                time.sleep(0.5)
         return self
 
     def process(self, data):
@@ -246,7 +254,10 @@ class WebClient():
                 self.connection.close()
                 return
             
-            
+    #this can be deleted
+    def load_message(self, message):
+        self._message = message
+
     def run(self):
 
         if(self.status.get() == False):
@@ -272,6 +283,16 @@ class WebClient():
                 self.connection.close()
                 break
             
+            #_____________
+            if(val == 'send load'):
+                v = self.send_message(str(self._message))
+                if(v == False):
+                    self.status.set_false()
+                    self.connection.close()
+                    break
+                else: continue
+
+            #______________
             status = self.send_message(val)
             if(status == False):
                 self.status.set_false()
@@ -312,11 +333,13 @@ class WebClient():
         return self.client_id
 
 
-client = WebClient('Jaedon')
-client.connect_to('38.56.138.77', 8888).run()
-print("test", client.get_card().read().name())
-client.close()
+#client = WebClient('Jaedon')
+#client.connect_to('38.56.138.77', 8888).run()
+#print("test", client.get_card().read().name())
+#client.close()
+
+
 
 #NOTE: 1) Needs multiclient support
 #      2) Protocol implementation
-#      3) 
+#      3) Should have reconnecting feature

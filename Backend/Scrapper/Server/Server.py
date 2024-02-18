@@ -506,7 +506,6 @@ class MultiClientServer():
                 
             
     def select_client(self, num):
-
         try:
             num = int(num)
             if(num > len(self.clients)-1 or num < 0):
@@ -533,7 +532,7 @@ class MultiClientServer():
         
     def send_message(self, message):
         if(len(self.clients) == 0):
-            print("[No Clients Available")
+            print("[No Clients Available]")
             return None
         
         if(self.current_client == None):

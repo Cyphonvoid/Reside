@@ -5,36 +5,33 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from Server.Server import MultiClientServer
+#from Server.Server import MultiClientServer
 import threading
+from Client import WebClient
 
 
 def launcher(address):
-    
     bot = RedfinBot()
     #value = bot.get_images_on_address(address)
     value = bot.location('specific').address(address).get_response()
     print(value)
 
 
-
-def launch_server(self, state):
-
+def launch_server():
     print("Enter your address: ", end="")
     address = input()
     bot = RedfinBot()
     #value = bot.get_images_on_address(address)
     value = bot.location('specific').address(address).get_response()
-    
-    if(state == True):
-        server = MultiClientServer()
-        server.load_messages(value)
-        server.run('192.168.1.222', 9999)
-        server.close()
+    client = WebClient('Scrapper Bot')
+    client.load_message(value)
+    client.connect_to('192.168.1.222', 9999).run()
+    print("test", client.get_card().read().name())
+    client.close()
 
-    
+
 print("Testing program has started: ")
-flag = False
+flag = True
 while(True):
 
     print(">> ", end="")
@@ -43,16 +40,6 @@ while(True):
     if(var == 'launch'):
         print("Enter your address please: ", end="")
         val = input()
-        launcher(val)
-
-        if(flag == False):
-            break
-        
-        time.sleep(4)
-        launcher(val)
-        time.sleep(4)
-        launcher(val)
-        time.sleep(4)
         launcher(val)
     
     elif(var == 'exit'):
@@ -84,16 +71,8 @@ while(True):
         driver = webdriver.Chrome()
         driver.get('https://redfin.com')
         time.sleep(50)
-        pass
     
-
     elif(var == 'run server'):
-        print("Enter State: ", end="")
-        state = input()
-
-        if(state == 'yes'):
-            launch_server(True)
-        else:
-            launch_server(False)
+        launch_server()
     
 

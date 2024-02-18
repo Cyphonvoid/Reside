@@ -269,7 +269,7 @@ class SpecificLocation():
             var = '/html/body/div[1]/div[11]/div[2]/div[6]/section/div/div[2]/div/div[1]/div[2]/div[1]/div/ul/li[1]'
             end = ']'
             
-            self.amenities.append(self.bot.search_element(By.XPATH, var))
+            self.amenities.append(self.bot.search_element(By.XPATH, var).get_element().text)
         except Exception as error:
             self.response = {
             'image_urls':self.image_urls, 
@@ -306,40 +306,32 @@ class RedfinBot():
         self.bot.activate()
 
     def login_to_website(self, credentials):
-
         try:
             val = '/html/body/div[1]/div[2]/div/div/header[2]/div[2]/div[7]/button'
             el = self.bot.search_element(By.XPATH, val).get_element()
             el.click()
             self.bot.wait(1)
            
-            #"""
             val = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[1]/div/span/span/div/input'
             el = self.bot.search_element(By.XPATH, val).get_element()
-            el.send_keys("yashaswi.kul@gmail.com")
+            el.send_keys(credentials[0])
             self.bot.wait(1)
             el.send_keys(Keys.ENTER)
             self.bot.wait(0.3)
-            #"""
-
-            
+ 
             vars = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/div[3]/button'
             el = self.bot.search_element(By.XPATH, vars).get_element()
             el.click()
             self.bot.wait(0.3)
 
-            
             var1 = '/html/body/div[5]/div/div[2]/div/div/div/div[2]/div/div/div/div[1]/div/div/form/div/div[2]/span/span/div/input'
             el = self.bot.search_element(By.XPATH, var1).get_element()
-            el.send_keys("yashema@E494murlipura2")
+            el.send_keys(credentials[1])
             el.send_keys(Keys.ENTER)
             self.bot.wait(1)
 
         except Exception as error:
             print("Error= ", error)
-        #"""
-        
-        pass
 
     def get_images_on_address(self, address, filter=None):
         #LOGIN
@@ -376,8 +368,6 @@ class RedfinBot():
         self.listing_type = type
         return self
     
-
-
 
 #bot = RedfinBot()
 #bot.get_images_on_address('512 Valley St, San Marcos, TX', 'for sale')
