@@ -45,7 +45,6 @@ class Serve(BaseHTTPRequestHandler):
                             param_list.insert(i, " ")
                         p_str += param_list[i]
                             
-
                     print("AFTER FILTER: ", p_str)
                     value = self.process_request(p_str)
                     response = "{ 'message': " + str(value) + " }" 
