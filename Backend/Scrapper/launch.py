@@ -26,34 +26,64 @@ class Serve(BaseHTTPRequestHandler):
             index = self.param_list.index('service')
             index += 1
 
-            try:
-            
-                string = self.param_list[index]
-                param_list = []
-                for i in range(0, len(string)):
-                    param_list.append(string[i])
+            if('python' in self.param_list):
+                try:
+                
+                    string = self.param_list[index]
+                    param_list = []
+                    for i in range(0, len(string)):
+                        param_list.append(string[i])
 
-                p_str = ''
-                for i in range(0, len(param_list)-1):
-                    if(i > len(param_list)-1):break
-                    if(param_list[i] == '%'):
-                        if(param_list[i+1] == '2'):
-                            param_list.pop(i+1)
-                            param_list.pop(i+1)
-                        param_list.pop(i)
-                        param_list.insert(i, " ")
-                    p_str += param_list[i]
-                        
+                    p_str = ''
+                    for i in range(0, len(param_list)-1):
+                        if(i > len(param_list)-1):break
+                        if(param_list[i] == '%'):
+                            if(param_list[i+1] == '2'):
+                                param_list.pop(i+1)
+                                param_list.pop(i+1)
+                            param_list.pop(i)
+                            param_list.insert(i, " ")
+                        p_str += param_list[i]
+                            
 
-                print("AFTER FILTER: ", p_str)
-                value = self.process_request(p_str)
-                response = "{ 'message': " + str(value) + " }" 
-                self.send_response(500)
-                self.wfile.write(bytes(response, "utf-8"))
+                    print("AFTER FILTER: ", p_str)
+                    value = self.process_request(p_str)
+                    response = "{ 'message': " + str(value) + " }" 
+                    self.send_response(200)
+                    self.wfile.write(bytes(response, "utf-8"))
+                
+                except Exception as error:
+                    self.send_response(500)
+                    print(error)
+                    self.wfile.write(bytes("Address specified is nout found", "utf-8"))
             
-            except Exception as error:
-                print(error)
-                self.wfile.write(bytes("Address specified is nout found", "utf-8"))
+            elif('java' in self.param_list):
+                try:
+                    string = self.param_list[index]
+                    modified_string = ""
+
+                    for char in string:
+                        if char == "-":
+                            modified_string += " "
+                        else:
+                            modified_string += char
+
+                    print("AFTER FILTER: ", modified_string)
+                    value = self.process_request(modified_string)
+                    response = "{ 'message': " + str(value) + " }" 
+                    self.send_response(200)
+                    self.wfile.write(bytes(response, "utf-8"))
+                
+                except Exception as error:
+                    self.send_response(500)
+                    print(error)
+                    self.wfile.write(bytes("Address specified is not found", "utf-8"))
+                pass
+
+            elif('test' in self.param_list):
+                print("test sent")
+                self.wfile.write(bytes("Hello this is test response", "utf-8"))
+
         
         else:
             self.send_response(403)
@@ -112,7 +142,7 @@ while(True):
             continue
         launcher(val)
     
-    elif(var == 'http server'):
+    elif(var == 'http'):
         launch_http()
     elif(var == 'exit'):
         break
@@ -147,4 +177,5 @@ while(True):
     elif(var == 'run server'):
         launch_server()
     
+
 

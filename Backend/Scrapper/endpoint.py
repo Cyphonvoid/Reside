@@ -7,14 +7,14 @@ class ScrapperAPI():
         self.address = ''
         self.domain = None
         self.url = '/service/'
-    
+        self.lang_id = "/python"
     
     def get_listing_on_specific_address(self, address):
         if(self.domain == None):
             print("Domain wasn't selected")
             return
         #url = "http://" + self.domain + self.url + "/" + address
-        url = "http://" + self.domain + self.url + address
+        url = "http://" + self.domain + self.url + address + self.lang_id
         return requests.get(url).text
     
     def destination_server(self, ip, port):

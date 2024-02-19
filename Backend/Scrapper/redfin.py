@@ -267,6 +267,7 @@ class SpecificLocation():
             
             try:
                 image_button = '/html/body/div[1]/div[11]/div[1]/div[3]/div/div[5]/div/button'
+                image_button = '/html/body/div[1]/div[11]/div[1]/div[2]/div/div[5]/div/button'
                 self.bot.search_element(By.XPATH, image_button).get_element().click()
 
                 image_class1 = 'inline-block selected'
@@ -423,6 +424,9 @@ class RedfinBot():
 
 #NOTE:
 """
+TODO:
+    - Set user agent etc
+    - Identify lang specific endpoints Java/python
 Apply Filters:
     - Manipulate settings buttons
 
